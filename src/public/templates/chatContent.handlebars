@@ -1,0 +1,9 @@
+<div class="card-body" id="cardBody">
+  {{#each chat}}
+    <div class="chatMessageContent">
+      <p class="chatUser">{{this.user}}</p>
+      <p class="chatDate">{{this.date}}</p>
+      <p class="chatMessage">{{this.message}}</p>
+    </div>
+  {{/each}}
+</div>

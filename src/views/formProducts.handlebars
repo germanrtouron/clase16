@@ -1,0 +1,68 @@
+<h2 class="titleFormProduct">Enter product</h2>
+{{! products form }}
+<section class="container-sm form-container">
+  <form class="formProducts" id="productForm">
+    <div class="row mb-3">
+      <label
+        class="labelProduct col col-form-label col-form-label-lg"
+      >Name:</label>
+      <div class="row-sm-10">
+        <input
+          type="text"
+          name="title"
+          id="title"
+          class="form-control"
+          placeholder="Add product name"
+        />
+      </div>
+    </div>
+    <div class="row mb-3">
+      <label
+        class="labelProduct col col-form-label col-form-label-lg"
+      >Price:</label>
+      <div class="row-sm-10">
+        <input
+          type="number"
+          name="price"
+          id="price"
+          class="form-control"
+          placeholder="Add product price"
+        />
+      </div>
+    </div>
+    <div class="row mb-3">
+      <label class="labelProduct col col-form-label col-form-label-lg">Image
+        URL:</label>
+      <div class="row-sm-10">
+        <input
+          type="text"
+          name="thumbnail"
+          id="thumbnail"
+          class="form-control"
+          placeholder="Add product thumbnail"
+        />
+      </div>
+    </div>
+    <button type="submit" class="btn btn-dark">Send</button>
+  </form>
+</section>
+<section class="chatContainer">
+  <h3 class="titleChat">Chat service</h3>
+  <div id="chatContent" class="card chatContent"></div>
+  <label for="chatInput" class="chatLabel">Write a message</label>
+  <textarea
+    class="chatInput card"
+    name="chatInput"
+    id="chatInput"
+    placeholder="write a message to interact with the chat"
+    cols="30"
+    rows="10"
+  ></textarea>
+</section>
+<section id="productsContainer" class="productsContainer"></section>
+{{! scripts import }}
+{{> importScripts }}
+<script src="/socket.io/socket.io.js"></script>
+<script src="user.js"></script>
+<script src="formProducts.js"></script>
+<script src="chat.js"></script>
