@@ -15,6 +15,10 @@ app.use(express.json());
 const routerProducts = express.Router();
 app.use("/api/productos", routerProducts);
 
+// cart router config
+const routerCart = express.Router();
+app.use("/api/carrito", routerCart);
+
 // handlebars config
 const handlebars = require("express-handlebars");
 app.engine("handlebars", handlebars.engine({ defaultLayout: "index" }));
@@ -32,6 +36,10 @@ server.on("error", (error) => console.log(`error at server ${PORT}`)); // catch 
 const Container = require("./managers/productsService");
 let productsService = new Container("products.txt");
 
+// cart service config
+const CartService = require("./managers/cartService");
+let cartService = new CartService("cart.txt");
+
 // chat service config
 const ChatContainer = require("./managers/chatService");
 let chatService = new ChatContainer("chat-history.txt");
@@ -42,6 +50,7 @@ const io = new Server(server);
 
 // websocket connection
 io.on("connection", async (socket) => {
+  // send products from backend to frontend
   io.sockets.emit("productList", await productsService.getAll());
   io.sockets.emit("chatContent", await chatService.getAll());
   // receive product from frontend
@@ -58,6 +67,22 @@ io.on("connection", async (socket) => {
   });
 });
 
+// admin permission
+let admin = true;
+
+// middleware permissions
+const permissions = (req, res, next) => {
+  if (admin === false) {
+    res.send({
+      error: "unauthorized",
+      message: "unauthorized permissions for your account",
+    });
+    throw new Error("unauthorized permissions for your account");
+  } else {
+    next();
+  }
+};
+
 // VIEWS routes
 // form view
 app.get("/", (req, res) => {
@@ -65,40 +90,41 @@ app.get("/", (req, res) => {
 });
 
 //products view
-app.get("/productos", (req, res) => {
-  productsService.getAll().length === 0
+app.get("/productos", async (req, res) => {
+  const products = await productsService.getAll();
+  products.length === 0 || products.message == "no file to read."
     ? res.render("emptyProducts", { message: "Sorry, no products found :(" })
     : res.render("viewProducts", {
-        products: productsService.getAll(),
+        products: products,
       });
 });
 
 //API routes
-// show all products.
-routerProducts.get("/", (req, res) => {
-  productsService.getAll().length === 0
+// show all products
+routerProducts.get("/", async (req, res) => {
+  const items = await productsService.getAll();
+  items.length === 0
     ? res.json({ message: "empty products array!" })
-    : res.send(productsService.getAll());
+    : res.json(items);
 });
 
 // show a product by id
-routerProducts.get("/:id", (req, res) => {
-  const id = parseInt(req.params.id);
-  const productById = productsService.getById(id);
-  if (productById.length === 0) {
-    res.json({
-      message: "error: product not found.",
-    });
-  } else
-    res.json({
-      product: productById,
-    });
+routerProducts.get("/:id", async (req, res) => {
+  const id = req.params.id;
+  const productById = await productsService.getById(id);
+  productById.message === "error: no file to read." || productById.length === 0
+    ? res.json({
+        message: "error: product not found.",
+      })
+    : res.json({
+        productById,
+      });
 });
 
 // save a product in array of products
-routerProducts.post("/", async (req, res) => {
+routerProducts.post("/", permissions, async (req, res) => {
   const productData = req.body;
-  if (productData.title && productData.price && productData.thumbnail) {
+  if (productsService.validationFields(productData) === true) {
     await productsService.save(productData);
     res.redirect("/");
   } else {
@@ -109,18 +135,19 @@ routerProducts.post("/", async (req, res) => {
 });
 
 // update a product in array of products by id
-routerProducts.put("/:id", (req, res) => {
+routerProducts.put("/:id", permissions, async (req, res) => {
   let id = parseInt(req.params.id);
   let product = req.body;
-  if (productsService.getById(id).length === 0) {
+  const productById = await productsService.getById(id);
+  if (productById.length == 0 || productById.message == "no file to read.") {
     res.json({
       message:
         "error: the product could not be updated because it does not exist.",
     });
   } else {
-    if (product.title && product.price && product.thumbnail) {
-      productsService.deleteById(id);
-      productsService.update(product, id);
+    if (productsService.validationFields(product) === true) {
+      await productsService.deleteById(id);
+      await productsService.update(product, id);
       res.json({
         message: "product updated successfully!",
       });
@@ -133,19 +160,119 @@ routerProducts.put("/:id", (req, res) => {
 });
 
 // delete a product in array of products by id
-routerProducts.delete("/:id", (req, res) => {
+routerProducts.delete("/:id", permissions, async (req, res) => {
   const id = parseInt(req.params.id);
-  const product = productsService.getById(id);
-  if (product.length === 0) {
+  const productById = await productsService.getById(id);
+  if (productById.length === 0 || productById.message === "no file to read.") {
     res.json({
       message:
         "error: the product could not be removed because it does not exist.",
     });
   } else {
-    productsService.deleteById(id);
+    await productsService.deleteById(id);
     res.json({
       message: "product removed successfully!",
     });
+  }
+});
+
+// cart routes
+// create a cart and return its id
+routerCart.post("/", async (req, res) => {
+  const cart = await cartService.createCart();
+  res.json({
+    message: `add cart id: ${cart.id}`,
+    content: cart,
+  });
+});
+
+// delete cart
+routerCart.delete("/:id", async (req, res) => {
+  const id = parseInt(req.params.id);
+  const cartById = await cartService.getById(id);
+  if (cartById.length === 0 || cartById.message == "no file to read.") {
+    res.json({
+      message: "error: this cart not exist.",
+    });
+  } else {
+    await cartService.deleteById(id);
+    res.json({
+      message: "cart removed successfully!",
+    });
+  }
+});
+
+// show all cart products
+routerCart.get("/:id/productos", async (req, res) => {
+  const id = parseInt(req.params.id);
+  const cartById = await cartService.getById(id);
+  if (cartById.length === 0 || cartById.message === "no file to read.") {
+    res.json({
+      message: "error: this cart not exist.",
+    });
+  } else {
+    res.json({
+      products: cartById[0].products,
+    });
+  }
+});
+
+// add product to cart according to its id
+routerCart.post("/:id/productos", async (req, res) => {
+  const cartId = parseInt(req.params.id);
+  const cartById = await cartService.getById(cartId);
+  // cart not exist case
+  if (cartById.length === 0 || cartById.message == "no file to read.") {
+    res.json({
+      message: "error: this cart not exist.",
+    });
+  } else {
+    // cart exist case
+    const productId = parseInt(req.body.id);
+    const productById = await productsService.getById(productId);
+    // product to add not exist case
+    if (productById.length === 0) {
+      res.json({
+        message: "error: product not found.",
+      });
+    } else {
+      // product exist case
+      await cartService.deleteById(cartId);
+      await cartService.addProduct(cartById, productById[0].id);
+      res.json({
+        message: "product added successfully!",
+        product: productById[0].id,
+      });
+    }
+  }
+});
+
+// remove a product from the cart according to its id
+routerCart.delete("/:id/productos/:id_prod", async (req, res) => {
+  const cartId = parseInt(req.params.id);
+  const cartById = await cartService.getById(cartId);
+  // cart not exist case
+  if (cartById.length === 0 || cartById.message == "no file to read.") {
+    res.json({
+      message: "error: this cart not exist.",
+    });
+  } else {
+    // cart exist case
+    const productId = parseInt(req.params.id_prod);
+    const checkProduct = cartById[0].products.includes(productId);
+    // product in cart not exist case
+    if (checkProduct == false) {
+      res.json({
+        message: "error: the cart does not have that product.",
+      });
+    } else {
+      // product in cart exist case
+      await cartService.deleteById(cartId);
+      await cartService.deleteProduct(cartById, productId);
+      res.json({
+        message: "product successfully removed!",
+      });
+    }
   }
 });
 

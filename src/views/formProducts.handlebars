@@ -1,7 +1,9 @@
 <h2 class="titleFormProduct">Enter product</h2>
 {{! products form }}
 <section class="container-sm form-container">
+  {{!-- form --}}
   <form class="formProducts" id="productForm">
+
     <div class="row mb-3">
       <label
         class="labelProduct col col-form-label col-form-label-lg"
@@ -9,13 +11,44 @@
       <div class="row-sm-10">
         <input
           type="text"
-          name="title"
-          id="title"
+          name="name"
+          id="name"
           class="form-control"
           placeholder="Add product name"
         />
       </div>
     </div>
+
+    <div class="row mb-3">
+      <label
+        class="labelProduct col col-form-label col-form-label-lg"
+      >Description:</label>
+      <div class="row-sm-10">
+        <input
+          type="text"
+          name="description"
+          id="description"
+          class="form-control"
+          placeholder="Add product description"
+        />
+      </div>
+    </div>
+
+        <div class="row mb-3">
+      <label
+        class="labelProduct col col-form-label col-form-label-lg"
+      >Code:</label>
+      <div class="row-sm-10">
+        <input
+          type="number"
+          name="code"
+          id="code"
+          class="form-control"
+          placeholder="Add product code (only numbers)"
+        />
+      </div>
+    </div>
+
     <div class="row mb-3">
       <label
         class="labelProduct col col-form-label col-form-label-lg"
@@ -26,10 +59,26 @@
           name="price"
           id="price"
           class="form-control"
-          placeholder="Add product price"
+          placeholder="Add product price (only numbers)"
         />
       </div>
     </div>
+
+        <div class="row mb-3">
+      <label
+        class="labelProduct col col-form-label col-form-label-lg"
+      >Stock:</label>
+      <div class="row-sm-10">
+        <input
+          type="number"
+          name="stock"
+          id="stock"
+          class="form-control"
+          placeholder="Add product stock (only numbers)"
+        />
+      </div>
+    </div>
+
     <div class="row mb-3">
       <label class="labelProduct col col-form-label col-form-label-lg">Image
         URL:</label>
@@ -43,23 +92,37 @@
         />
       </div>
     </div>
-    <button type="submit" class="btn btn-dark">Send</button>
+
+    <button type="submit" class="btn btn-success">Send</button>
+
   </form>
 </section>
 <section class="chatContainer">
   <h3 class="titleChat">Chat service</h3>
   <div id="chatContent" class="card chatContent"></div>
   <label for="chatInput" class="chatLabel">Write a message</label>
-  <textarea
-    class="chatInput card"
-    name="chatInput"
-    id="chatInput"
-    placeholder="write a message to interact with the chat"
-    cols="30"
-    rows="10"
-  ></textarea>
+  <div class="chatInput">
+    <div class="wrapper">
+      <span class="material-symbols-outlined">
+        verified_user
+      </span>
+      <div class="verifiedPopover" id="verifiedPopover"><p>verified user</p></div>
+    </div>
+    <textarea
+      class="textarea"
+      name="chatInput"
+      id="chatInput"
+      placeholder="write a message to interact with the chat"
+      cols="30"
+      rows="10"
+    ></textarea>
+    <button class="btn btn-success" onclick="submitChat()"><span
+        class="material-symbols-outlined"
+      >
+        reply
+      </span></button>
+  </div>
 </section>
-<section id="productsContainer" class="productsContainer"></section>
 {{! scripts import }}
 {{> importScripts }}
 <script src="/socket.io/socket.io.js"></script>
