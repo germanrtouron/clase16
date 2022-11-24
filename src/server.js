@@ -136,7 +136,7 @@ routerProducts.post("/", permissions, async (req, res) => {
 
 // update a product in array of products by id
 routerProducts.put("/:id", permissions, async (req, res) => {
-  let id = parseInt(req.params.id);
+  let id = req.params.id;
   let product = req.body;
   const productById = await productsService.getById(id);
   if (productById.length == 0 || productById.message == "no file to read.") {
@@ -161,7 +161,7 @@ routerProducts.put("/:id", permissions, async (req, res) => {
 
 // delete a product in array of products by id
 routerProducts.delete("/:id", permissions, async (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = req.params.id;
   const productById = await productsService.getById(id);
   if (productById.length === 0 || productById.message === "no file to read.") {
     res.json({
@@ -228,7 +228,7 @@ routerCart.post("/:id/productos", async (req, res) => {
     });
   } else {
     // cart exist case
-    const productId = parseInt(req.body.id);
+    const productId = req.body.id;
     const productById = await productsService.getById(productId);
     // product to add not exist case
     if (productById.length === 0) {
@@ -258,7 +258,7 @@ routerCart.delete("/:id/productos/:id_prod", async (req, res) => {
     });
   } else {
     // cart exist case
-    const productId = parseInt(req.params.id_prod);
+    const productId = req.params.id_prod;
     const checkProduct = cartById[0].products.includes(productId);
     // product in cart not exist case
     if (checkProduct == false) {
