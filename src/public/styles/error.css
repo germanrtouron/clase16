@@ -1,0 +1,24 @@
+body {
+  font-family: "Arvo", serif;
+}
+.container {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+}
+.error-body-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.error-body {
+  margin: 15px 0;
+}
+.error-body-title {
+  font-size: 30px;
+}
+@media (max-width: 992px) {
+  .error-body-container {
+    align-items: center;
+  }
+}

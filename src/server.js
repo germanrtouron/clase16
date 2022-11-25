@@ -277,4 +277,12 @@ routerCart.delete("/:id/productos/:id_prod", async (req, res) => {
 });
 
 // invalid paths
-app.get("*", (req, res) => res.json({ message: "error: invalid path" }));
+app.get("*", (req, res) =>
+  // res
+  //   .status(404)
+  //   .json(`route ${req.originalUrl} method ${req.method} not implemented`)
+  res.render("404", {
+    layout: false,
+    message: `route "${req.originalUrl}" method "${req.method}" not implemented`,
+  })
+);
