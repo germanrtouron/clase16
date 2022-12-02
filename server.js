@@ -155,7 +155,6 @@ routerProducts.put("/:id", permissions, async (req, res) => {
     });
   } else {
     if (productsService.validationFields(product) === true) {
-      await productsService.deleteById(id);
       await productsService.update(product, id);
       res.json({
         message: "product updated successfully!",
