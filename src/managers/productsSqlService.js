@@ -12,7 +12,7 @@ class Product {
   }
 }
 
-class MySqlService {
+class ProductsMySqlService {
   constructor(options, tableName) {
     this.database = knex(options);
     this.table = tableName;
@@ -54,4 +54,4 @@ class MySqlService {
   }
 }
 
-module.exports = { MySqlService };
+module.exports = { ProductsMySqlService };

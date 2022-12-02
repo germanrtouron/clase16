@@ -46,11 +46,12 @@ let cartService = new CartService("cart.txt");
 
 // mySql products config
 const { options } = require("./src/config/databaseConfig");
-const { MySqlService } = require("./src/managers/mySqlService");
-const productsService = new MySqlService(options.mariaDB, "products");
+const { ProductsMySqlService } = require("./src/managers/productsSqlService");
+const productsService = new ProductsMySqlService(options.mariaDB, "products");
 
 // mySqlite chat config
-const chatService = new MySqlService(options.sqliteDB, "chat");
+const { ChatSqliteService } = require("./src/managers/chatSqliteService");
+const chatService = new ChatSqliteService(options.sqliteDB, "chat");
 
 // websocket config
 const { Server } = require("socket.io");
