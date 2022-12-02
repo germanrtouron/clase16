@@ -22,7 +22,7 @@ app.use("/api/carrito", routerCart);
 // handlebars config
 const handlebars = require("express-handlebars");
 app.engine("handlebars", handlebars.engine({ defaultLayout: "index" }));
-const views = path.join(__dirname, "views");
+const views = path.join(__dirname, "src/views");
 app.set("views", views);
 app.set("view engine", "handlebars");
 
@@ -33,16 +33,24 @@ const server = app.listen(PORT, () => {
 server.on("error", (error) => console.log(`error at server ${PORT}`)); // catch server error.
 
 // products service config
-const Container = require("./managers/productsService");
-let productsService = new Container("products.txt");
+//const Container = require("./src/managers/productsService");
+//let productsService = new Container("products.txt");
 
 // cart service config
-const CartService = require("./managers/cartService");
+const CartService = require("./src/managers/cartService");
 let cartService = new CartService("cart.txt");
 
 // chat service config
-const ChatContainer = require("./managers/chatService");
-let chatService = new ChatContainer("chat-history.txt");
+//const ChatContainer = require("./src/managers/chatService");
+//let chatService = new ChatContainer("chat-history.txt");
+
+// mySql products config
+const { options } = require("./src/config/databaseConfig");
+const { MySqlService } = require("./src/managers/mySqlService");
+const productsService = new MySqlService(options.mariaDB, "products");
+
+// mySqlite chat config
+const chatService = new MySqlService(options.sqliteDB, "chat");
 
 // websocket config
 const { Server } = require("socket.io");
@@ -278,9 +286,6 @@ routerCart.delete("/:id/productos/:id_prod", async (req, res) => {
 
 // invalid paths
 app.get("*", (req, res) =>
-  // res
-  //   .status(404)
-  //   .json(`route ${req.originalUrl} method ${req.method} not implemented`)
   res.render("404", {
     layout: false,
     message: `route "${req.originalUrl}" method "${req.method}" not implemented`,

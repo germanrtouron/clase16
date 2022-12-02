@@ -1,5 +1,11 @@
 body {
   font-family: "Arvo", serif;
+  background: rgb(147, 88, 209);
+  background: linear-gradient(
+    157deg,
+    rgba(147, 88, 209, 1) 0%,
+    rgba(162, 89, 157, 1) 100%
+  );
 }
 .container {
   height: 100vh;
